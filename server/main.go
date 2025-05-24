@@ -17,13 +17,26 @@ var vendors = []vendor{
 }
 
 func getVendors(ctx *gin.Context) {
-	ctx.IndentedJSON(http.StatusOK, vendors)
+	ctx.JSON(http.StatusOK, vendors)
+}
+
+func addVendor(ctx *gin.Context) {
+	var newVendor vendor
+
+	err := ctx.BindJSON(&newVendor)
+	if err != nil {
+		return
+	}
+
+	vendors = append(vendors, newVendor)
+	ctx.IndentedJSON(http.StatusCreated, newVendor)
 }
 
 func main() {
 	router := gin.Default()
 
 	router.GET("/vendors", getVendors)
+	router.POST("/vendors", addVendor)
 
 	router.Run("localhost:8080")
 }
