@@ -38,5 +38,5 @@ func main() {
 	router.GET("/vendors", getVendors)
 	router.POST("/vendors", addVendor)
 
-	router.Run("localhost:8080")
+	router.Run(":8080")
 }
