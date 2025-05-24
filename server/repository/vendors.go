@@ -5,9 +5,9 @@ import (
 )
 
 type Vendor struct {
-	ID          int    `json:"id"`
-	Name        string `json:"name"`
-	Description string `json:"description"`
+	ID          int     `json:"id"`
+	Name        *string `json:"name"`
+	Description *string `json:"description"`
 }
 
 // GetAllVendors returns all rows in the vendors table
@@ -22,7 +22,7 @@ func GetAllVendors() ([]Vendor, error) {
 	for rows.Next() {
 		var vendor Vendor
 
-		err := rows.Scan(&vendor.ID, &vendor.Name)
+		err := rows.Scan(&vendor.ID, &vendor.Name, &vendor.Description)
 		if err != nil {
 			return nil, fmt.Errorf("failed to scan vendor row: %w", err)
 		}
