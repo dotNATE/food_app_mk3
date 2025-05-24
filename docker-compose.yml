@@ -1,0 +1,30 @@
+services:
+  server:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    restart: on-failure
+    ports:
+      - "8080:8080"
+    depends_on:
+      - "database"
+    networks:
+      - "food_app"
+
+  database:
+    image: "arm64v8/mysql:latest"
+    container_name: "db-mysql"
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_DATABASE: "food_app"
+      MYSQL_ROOT_USER: "root"
+      MYSQL_ROOT_PASSWORD: "password"
+    # volumes:
+    #   - "./resources/db.sql:/docker-entrypoint-initdb.d/db.sql"
+    networks:
+      - "food_app"
+
+networks:
+  food_app:
+    driver: "bridge"
