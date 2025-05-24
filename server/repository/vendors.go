@@ -5,13 +5,14 @@ import (
 )
 
 type Vendor struct {
-	ID   int
-	Name string
+	ID          int    `json:"id"`
+	Name        string `json:"name"`
+	Description string `json:"description"`
 }
 
 // GetAllVendors returns all rows in the vendors table
 func GetAllVendors() ([]Vendor, error) {
-	rows, err := DB.Query("SELECT id, name FROM vendors")
+	rows, err := DB.Query("SELECT id, name, description FROM vendors")
 	if err != nil {
 		return nil, fmt.Errorf("failed to query vendors: %w", err)
 	}
@@ -35,4 +36,22 @@ func GetAllVendors() ([]Vendor, error) {
 	}
 
 	return vendors, nil
+}
+
+// InsertVendor inserts one new row only to the vendors table
+func InsertVendor(vendor Vendor) (int64, error) {
+	result, err := DB.Exec(
+		"INSERT INTO vendors (name, description) VALUES (?, ?)",
+		vendor.Name, vendor.Description,
+	)
+	if err != nil {
+		return 0, fmt.Errorf("failed to insert vendor: %w", err)
+	}
+
+	id, err := result.LastInsertId()
+	if err != nil {
+		return 0, fmt.Errorf("failed to get inserted ID: %w", err)
+	}
+
+	return id, nil
 }

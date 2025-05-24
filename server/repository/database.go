@@ -10,7 +10,6 @@ import (
 var DB *sql.DB
 
 func InitDB() {
-
 	dsn := "root:password@tcp(database:3306)/food_app?parseTime=true"
 
 	var err error
