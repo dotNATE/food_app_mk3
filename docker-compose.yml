@@ -4,6 +4,8 @@ services:
       context: ./server
       dockerfile: Dockerfile
     restart: on-failure
+    volumes:
+      - ./server:/app
     ports:
       - "8080:8080"
     depends_on:
