@@ -22,7 +22,6 @@ type Rating struct {
 	CreatedAt time.Time `json:"created_at"`
 }
 
-// InsertRating inserts one new row only to the ratings table
 func (repo *RatingRepository) InsertRating(rating Rating) (*Rating, error) {
 	result, err := DB.Exec(
 		"INSERT INTO ratings (score, review, vendor_id) VALUES (?, ?, ?)",

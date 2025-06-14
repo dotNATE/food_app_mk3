@@ -22,7 +22,6 @@ type Vendor struct {
 	CreatedAt     time.Time `json:"created_at"`
 }
 
-// GetAllVendors returns all rows in the vendors table
 func (repo *VendorRepository) GetAllVendors() ([]Vendor, error) {
 	rows, err := DB.Query("SELECT id, name, description, average_rating, created_at FROM vendors")
 	if err != nil {
@@ -50,7 +49,6 @@ func (repo *VendorRepository) GetAllVendors() ([]Vendor, error) {
 	return vendors, nil
 }
 
-// InsertVendor inserts one new row only to the vendors table
 func (repo *VendorRepository) InsertVendor(vendor Vendor) (*Vendor, error) {
 	result, err := DB.Exec(
 		"INSERT INTO vendors (name, description) VALUES (?, ?)",
@@ -77,7 +75,6 @@ func (repo *VendorRepository) InsertVendor(vendor Vendor) (*Vendor, error) {
 	return &created, nil
 }
 
-// VendorExists checks whether a vendor exists with the given vendor_id
 func (r *VendorRepository) CheckVendorExists(vendor_id int64) (bool, error) {
 	var exists bool
 	err := r.DB.QueryRow("SELECT EXISTS(SELECT 1 FROM vendors WHERE id = ?)", vendor_id).Scan(&exists)
