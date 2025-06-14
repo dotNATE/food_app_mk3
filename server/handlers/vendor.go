@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	utils "main/pkg"
 	"main/repository"
 	"net/http"
 
@@ -18,17 +19,17 @@ func NewVendorHandler(vendorRepo *repository.VendorRepository) *VendorHandler {
 func (handler *VendorHandler) GetVendors(ctx *gin.Context) {
 	vendors, err := handler.VendorRepo.GetAllVendors()
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{
-			"success": false,
-			"error":   "There was a problem fetching the vendors: " + err.Error(),
+		ctx.JSON(http.StatusInternalServerError, utils.HTTPResponse{
+			Success: false,
+			Error:   "There was a problem fetching the vendors: " + err.Error(),
 		})
 		return
 	}
 
-	ctx.JSON(http.StatusOK, gin.H{
-		"success": true,
-		"message": "Successfully fetched all vendors",
-		"data":    vendors,
+	ctx.JSON(http.StatusOK, utils.HTTPResponse{
+		Success: true,
+		Message: "Successfully fetched all vendors",
+		Data:    vendors,
 	})
 }
 
@@ -37,25 +38,25 @@ func (handler *VendorHandler) AddNewVendor(ctx *gin.Context) {
 
 	err := ctx.ShouldBindJSON(&new_vendor)
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{
-			"success": false,
-			"error":   "Invalid input: " + err.Error(),
+		ctx.JSON(http.StatusBadRequest, utils.HTTPResponse{
+			Success: false,
+			Error:   "Invalid input: " + err.Error(),
 		})
 		return
 	}
 
 	vendor, err := handler.VendorRepo.InsertVendor(new_vendor)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{
-			"success": false,
-			"error":   "Failed to insert vendor: " + err.Error(),
+		ctx.JSON(http.StatusInternalServerError, utils.HTTPResponse{
+			Success: false,
+			Error:   "Failed to insert vendor: " + err.Error(),
 		})
 		return
 	}
 
-	ctx.JSON(http.StatusCreated, gin.H{
-		"success": true,
-		"message": "Vendor created successfully",
-		"data":    vendor,
+	ctx.JSON(http.StatusCreated, utils.HTTPResponse{
+		Success: true,
+		Message: "Vendor created successfully",
+		Data:    vendor,
 	})
 }

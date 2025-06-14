@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"fmt"
+	utils "main/pkg"
 	"main/repository"
 	"net/http"
 	"strconv"
@@ -24,34 +25,34 @@ func (handler *RatingHandler) AddNewRating(ctx *gin.Context) {
 
 	err := ctx.ShouldBindJSON(&new_rating)
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{
-			"success": false,
-			"error":   "Invalid input: " + err.Error(),
+		ctx.JSON(http.StatusBadRequest, utils.HTTPResponse{
+			Success: false,
+			Error:   "Invalid input: " + err.Error(),
 		})
 		return
 	}
 
 	vendor_id, err := strconv.ParseInt(vendor_id_param, 10, 64)
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{
-			"success": false,
-			"error":   "Invalid vendor_id, must be a number: " + err.Error(),
+		ctx.JSON(http.StatusBadRequest, utils.HTTPResponse{
+			Success: false,
+			Error:   "Invalid vendor_id, must be a number: " + err.Error(),
 		})
 		return
 	}
 
 	vendor_exists, err := handler.VendorRepo.CheckVendorExists(vendor_id)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{
-			"success": false,
-			"error":   "Something went wrong checking vendor_id, please try again: " + err.Error(),
+		ctx.JSON(http.StatusInternalServerError, utils.HTTPResponse{
+			Success: false,
+			Error:   "Something went wrong checking vendor_id, please try again: " + err.Error(),
 		})
 		return
 	}
 	if !vendor_exists {
-		ctx.JSON(http.StatusNotFound, gin.H{
-			"success": false,
-			"error":   fmt.Sprintf("No vendor found with id: %d", vendor_id),
+		ctx.JSON(http.StatusNotFound, utils.HTTPResponse{
+			Success: false,
+			Error:   fmt.Sprintf("No vendor found with id: %d", vendor_id),
 		})
 		return
 	}
@@ -59,25 +60,25 @@ func (handler *RatingHandler) AddNewRating(ctx *gin.Context) {
 	new_rating.VendorId = vendor_id
 	rating, err := handler.RatingRepo.InsertRating(new_rating)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{
-			"success": false,
-			"error":   "Failed to insert rating: " + err.Error(),
+		ctx.JSON(http.StatusInternalServerError, utils.HTTPResponse{
+			Success: false,
+			Error:   "Failed to insert rating: " + err.Error(),
 		})
 		return
 	}
 
 	err = handler.VendorRepo.UpdateAverageRating(vendor_id)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{
-			"success": false,
-			"error":   "Failed to update vendor average_rating: " + err.Error(),
+		ctx.JSON(http.StatusInternalServerError, utils.HTTPResponse{
+			Success: false,
+			Error:   "Failed to update vendor average_rating: " + err.Error(),
 		})
 		return
 	}
 
-	ctx.JSON(http.StatusCreated, gin.H{
-		"success": true,
-		"message": "Rating created successfully",
-		"data":    rating,
+	ctx.JSON(http.StatusCreated, utils.HTTPResponse{
+		Success: true,
+		Message: "Rating created successfully",
+		Data:    rating,
 	})
 }
