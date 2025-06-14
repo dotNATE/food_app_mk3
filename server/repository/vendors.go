@@ -64,3 +64,10 @@ func (repo *VendorRepository) InsertVendor(vendor Vendor) (int64, error) {
 
 	return id, nil
 }
+
+// VendorExists checks whether a vendor exists with the given vendor_id
+func (r *VendorRepository) CheckVendorExists(vendor_id int) (bool, error) {
+	var exists bool
+	err := r.DB.QueryRow("SELECT EXISTS(SELECT 1 FROM vendors WHERE id = ?)", vendor_id).Scan(&exists)
+	return exists, err
+}
