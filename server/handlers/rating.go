@@ -76,9 +76,46 @@ func (handler *RatingHandler) AddNewRating(ctx *gin.Context) {
 		return
 	}
 
+	ctx.Header("Location", fmt.Sprintf("vendors/%d/ratings/%d", rating.VendorId, rating.ID))
 	ctx.JSON(http.StatusCreated, utils.HTTPResponse{
 		Success: true,
 		Message: "Rating created successfully",
+		Data:    rating,
+	})
+}
+
+func (handler *RatingHandler) GetRatingById(ctx *gin.Context) {
+	rating_id_param := ctx.Param("rating_id")
+	rating_id, err := strconv.ParseInt(rating_id_param, 10, 64)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, utils.HTTPResponse{
+			Success: false,
+			Error:   "Invalid rating id, must be a number: " + err.Error(),
+		})
+		return
+	}
+
+	vendor_id_param := ctx.Param("vendor_id")
+	vendor_id, err := strconv.ParseInt(vendor_id_param, 10, 64)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, utils.HTTPResponse{
+			Success: false,
+			Error:   "Invalid vendor id, must be a number: " + err.Error(),
+		})
+		return
+	}
+
+	rating, err := handler.RatingRepo.GetRatingById(rating_id, vendor_id)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, utils.HTTPResponse{
+			Success: false,
+			Error:   err.Error(),
+		})
+	}
+
+	ctx.JSON(http.StatusOK, utils.HTTPResponse{
+		Success: true,
+		Message: "Successfully fetched rating",
 		Data:    rating,
 	})
 }

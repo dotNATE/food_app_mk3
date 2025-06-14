@@ -47,3 +47,17 @@ func (repo *RatingRepository) InsertRating(rating Rating) (*Rating, error) {
 
 	return &created, nil
 }
+
+func (repo *RatingRepository) GetRatingById(rating_id int64, vendor_id int64) (*Rating, error) {
+	var rating Rating
+	err := DB.QueryRow(
+		"SELECT id, score, review, vendor_id, created_at FROM ratings WHERE id = ? AND vendor_id = ?",
+		rating_id,
+		vendor_id,
+	).Scan(&rating.ID, &rating.Score, &rating.Review, &rating.VendorId, &rating.CreatedAt)
+	if err != nil {
+		return nil, fmt.Errorf("failed to fetch rating: %w", err)
+	}
+
+	return &rating, nil
+}

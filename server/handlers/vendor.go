@@ -1,9 +1,11 @@
 package handlers
 
 import (
+	"fmt"
 	utils "main/pkg"
 	"main/repository"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
@@ -54,9 +56,36 @@ func (handler *VendorHandler) AddNewVendor(ctx *gin.Context) {
 		return
 	}
 
+	ctx.Header("Location", fmt.Sprintf("vendors/%d", vendor.ID))
 	ctx.JSON(http.StatusCreated, utils.HTTPResponse{
 		Success: true,
 		Message: "Vendor created successfully",
+		Data:    vendor,
+	})
+}
+
+func (handler *VendorHandler) GetVendorById(ctx *gin.Context) {
+	vendor_id_param := ctx.Param("vendor_id")
+	vendor_id, err := strconv.ParseInt(vendor_id_param, 10, 64)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, utils.HTTPResponse{
+			Success: false,
+			Error:   "Invalid vendor id, must be a number: " + err.Error(),
+		})
+		return
+	}
+
+	vendor, err := handler.VendorRepo.GetVendorById(vendor_id)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, utils.HTTPResponse{
+			Success: false,
+			Error:   err.Error(),
+		})
+	}
+
+	ctx.JSON(http.StatusOK, utils.HTTPResponse{
+		Success: true,
+		Message: "Successfully fetched vendor",
 		Data:    vendor,
 	})
 }

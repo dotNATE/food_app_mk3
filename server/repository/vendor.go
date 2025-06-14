@@ -90,3 +90,16 @@ func (r *VendorRepository) UpdateAverageRating(vendor_id int64) error {
 		WHERE id = ?`, vendor_id, vendor_id)
 	return err
 }
+
+func (repo *VendorRepository) GetVendorById(vendor_id int64) (*Vendor, error) {
+	var vendor Vendor
+	err := DB.QueryRow(
+		"SELECT id, name, description, average_rating, created_at FROM vendors WHERE id = ?",
+		vendor_id,
+	).Scan(&vendor.ID, &vendor.Name, &vendor.Description, &vendor.AverageRating, &vendor.CreatedAt)
+	if err != nil {
+		return nil, fmt.Errorf("failed to fetch vendor: %w", err)
+	}
+
+	return &vendor, nil
+}

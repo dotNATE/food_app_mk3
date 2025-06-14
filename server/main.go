@@ -18,7 +18,10 @@ func main() {
 
 	router.GET("/vendors", vendorHandler.GetVendors)
 	router.POST("/vendors", vendorHandler.AddNewVendor)
+	router.GET("/vendors/:vendor_id", vendorHandler.GetVendorById)
 	router.POST("/vendors/:vendor_id/ratings", ratingHandler.AddNewRating)
+	// router.GET("/vendors/:vendor_id/ratings", ratingHandler.GetRatingsByVendorId) NOT YET IMPLEMENTED
+	router.GET("/vendors/:vendor_id/ratings/:rating_id", ratingHandler.GetRatingById)
 
 	router.Run(":8080")
 }
