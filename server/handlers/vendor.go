@@ -28,11 +28,11 @@ func (handler *VendorHandler) GetVendors(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, gin.H{
 		"success": true,
 		"message": "Successfully fetched all vendors",
-		"vendors": vendors,
+		"data":    vendors,
 	})
 }
 
-func (handler *VendorHandler) InsertNewVendor(ctx *gin.Context) {
+func (handler *VendorHandler) AddNewVendor(ctx *gin.Context) {
 	var new_vendor repository.Vendor
 
 	err := ctx.ShouldBindJSON(&new_vendor)
@@ -44,7 +44,7 @@ func (handler *VendorHandler) InsertNewVendor(ctx *gin.Context) {
 		return
 	}
 
-	id, err := handler.VendorRepo.InsertVendor(new_vendor)
+	vendor, err := handler.VendorRepo.InsertVendor(new_vendor)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{
 			"success": false,
@@ -54,8 +54,8 @@ func (handler *VendorHandler) InsertNewVendor(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusCreated, gin.H{
-		"success":   true,
-		"message":   "Vendor created successfully",
-		"vendor_id": id,
+		"success": true,
+		"message": "Vendor created successfully",
+		"data":    vendor,
 	})
 }
