@@ -1,8 +1,17 @@
 package repository
 
 import (
+	"database/sql"
 	"fmt"
 )
+
+type VendorRepository struct {
+	DB *sql.DB
+}
+
+func NewVendorRepository(db *sql.DB) *VendorRepository {
+	return &VendorRepository{DB: db}
+}
 
 type Vendor struct {
 	ID          int     `json:"id"`
@@ -11,7 +20,7 @@ type Vendor struct {
 }
 
 // GetAllVendors returns all rows in the vendors table
-func GetAllVendors() ([]Vendor, error) {
+func (repo *VendorRepository) GetAllVendors() ([]Vendor, error) {
 	rows, err := DB.Query("SELECT id, name, description FROM vendors")
 	if err != nil {
 		return nil, fmt.Errorf("failed to query vendors: %w", err)
@@ -39,7 +48,7 @@ func GetAllVendors() ([]Vendor, error) {
 }
 
 // InsertVendor inserts one new row only to the vendors table
-func InsertVendor(vendor Vendor) (int64, error) {
+func (repo *VendorRepository) InsertVendor(vendor Vendor) (int64, error) {
 	result, err := DB.Exec(
 		"INSERT INTO vendors (name, description) VALUES (?, ?)",
 		vendor.Name, vendor.Description,
