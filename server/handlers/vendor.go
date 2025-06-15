@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"fmt"
+	"main/models"
 	utils "main/pkg"
 	"main/repository"
 	"net/http"
@@ -36,7 +37,7 @@ func (handler *VendorHandler) GetVendors(ctx *gin.Context) {
 }
 
 func (handler *VendorHandler) AddNewVendor(ctx *gin.Context) {
-	var new_vendor repository.Vendor
+	var new_vendor models.Vendor
 
 	err := ctx.ShouldBindJSON(&new_vendor)
 	if err != nil {

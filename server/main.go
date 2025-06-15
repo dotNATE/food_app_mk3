@@ -8,13 +8,15 @@ import (
 )
 
 func main() {
-	repository.InitDB()
-	defer repository.DB.Close()
+	db := repository.InitDB()
 
 	router := gin.Default()
 
-	vendorHandler := handlers.NewVendorHandler(repository.NewVendorRepository(repository.DB))
-	ratingHandler := handlers.NewRatingHandler(repository.NewRatingRepository(repository.DB), repository.NewVendorRepository(repository.DB))
+	vendorRepo := repository.NewVendorRepository(db)
+	ratingRepo := repository.NewRatingRepository(db)
+
+	vendorHandler := handlers.NewVendorHandler(vendorRepo)
+	ratingHandler := handlers.NewRatingHandler(ratingRepo, vendorRepo)
 
 	router.GET("/vendors", vendorHandler.GetVendors)
 	router.POST("/vendors", vendorHandler.AddNewVendor)

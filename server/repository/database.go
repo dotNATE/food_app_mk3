@@ -1,26 +1,26 @@
 package repository
 
 import (
-	"database/sql"
 	"log"
 
-	_ "github.com/go-sql-driver/mysql"
+	"main/models"
+
+	"gorm.io/driver/mysql"
+	"gorm.io/gorm"
 )
 
-var DB *sql.DB
+func InitDB() *gorm.DB {
+	dsn := "root:password@tcp(database:3306)/food_app?charset=utf8mb4&parseTime=True&loc=Local"
 
-func InitDB() {
-	dsn := "root:password@tcp(database:3306)/food_app?parseTime=true"
-
-	var err error
-	DB, err = sql.Open("mysql", dsn)
+	DB, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	if err != nil {
-		log.Fatal("Error opening DB:", err)
+		log.Fatalf("Failed to connect to database: %v", err)
 	}
 
-	if err := DB.Ping(); err != nil {
-		log.Fatal("Error connecting to DB:", err)
+	// Auto migrate your schema
+	if err := DB.AutoMigrate(&models.Vendor{}, &models.Rating{}); err != nil {
+		log.Fatalf("Migration failed: %v", err)
 	}
 
-	log.Println("Connected to database successfully!")
+	return DB
 }

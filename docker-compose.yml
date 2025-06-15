@@ -22,8 +22,6 @@ services:
       MYSQL_DATABASE: "food_app"
       MYSQL_ROOT_USER: "root"
       MYSQL_ROOT_PASSWORD: "password"
-    volumes:
-      - ./resources/sql:/docker-entrypoint-initdb.d
     networks:
       - "food_app"
 

@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"fmt"
+	"main/models"
 	utils "main/pkg"
 	"main/repository"
 	"net/http"
@@ -20,7 +21,7 @@ func NewRatingHandler(ratingRepo *repository.RatingRepository, vendorRepo *repos
 }
 
 func (handler *RatingHandler) AddNewRating(ctx *gin.Context) {
-	var new_rating repository.Rating
+	var new_rating models.Rating
 	vendor_id_param := ctx.Param("vendor_id")
 
 	err := ctx.ShouldBindJSON(&new_rating)

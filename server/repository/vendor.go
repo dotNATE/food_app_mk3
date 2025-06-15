@@ -1,102 +1,78 @@
 package repository
 
 import (
-	"database/sql"
 	"fmt"
-	"time"
+	"main/models"
+
+	"gorm.io/gorm"
 )
 
 type VendorRepository struct {
-	DB *sql.DB
+	DB *gorm.DB
 }
 
-func NewVendorRepository(db *sql.DB) *VendorRepository {
+func NewVendorRepository(db *gorm.DB) *VendorRepository {
 	return &VendorRepository{DB: db}
 }
 
-type Vendor struct {
-	ID            int64     `json:"id"`
-	Name          string    `json:"name"`
-	Description   string    `json:"description"`
-	AverageRating float64   `json:"average_rating"`
-	CreatedAt     time.Time `json:"created_at"`
-}
+func (repo *VendorRepository) GetAllVendors() ([]models.Vendor, error) {
+	var vendors []models.Vendor
 
-func (repo *VendorRepository) GetAllVendors() ([]Vendor, error) {
-	rows, err := DB.Query("SELECT id, name, description, average_rating, created_at FROM vendors")
+	err := repo.DB.Find(&vendors).Error
 	if err != nil {
 		return nil, fmt.Errorf("failed to query vendors: %w", err)
-	}
-	defer rows.Close()
-
-	var vendors []Vendor
-	for rows.Next() {
-		var vendor Vendor
-
-		err := rows.Scan(&vendor.ID, &vendor.Name, &vendor.Description, &vendor.AverageRating, &vendor.CreatedAt)
-		if err != nil {
-			return nil, fmt.Errorf("failed to scan vendor row: %w", err)
-		}
-
-		vendors = append(vendors, vendor)
-	}
-
-	err = rows.Err()
-	if err != nil {
-		return nil, fmt.Errorf("rows iteration error: %w", err)
 	}
 
 	return vendors, nil
 }
 
-func (repo *VendorRepository) InsertVendor(vendor Vendor) (*Vendor, error) {
-	result, err := DB.Exec(
-		"INSERT INTO vendors (name, description) VALUES (?, ?)",
-		vendor.Name, vendor.Description,
-	)
+func (repo *VendorRepository) InsertVendor(vendor models.Vendor) (*models.Vendor, error) {
+	err := repo.DB.Create(&vendor).Error
 	if err != nil {
 		return nil, fmt.Errorf("failed to insert vendor: %w", err)
 	}
 
-	id, err := result.LastInsertId()
+	return &vendor, nil
+}
+
+func (repo *VendorRepository) CheckVendorExists(vendor_id int64) (bool, error) {
+	var count int64
+
+	err := repo.DB.Model(&models.Vendor{}).Where("id = ?", vendor_id).Count(&count).Error
 	if err != nil {
-		return nil, fmt.Errorf("failed to get inserted ID: %w", err)
+		return false, fmt.Errorf("failed to check vendor existence: %w", err)
 	}
 
-	var created Vendor
-	err = DB.QueryRow(
-		"SELECT id, name, description, created_at FROM vendors WHERE id = ?",
-		id,
-	).Scan(&created.ID, &created.Name, &created.Description, &created.CreatedAt)
+	return count > 0, nil
+}
+
+func (repo *VendorRepository) UpdateAverageRating(vendor_id int64) error {
+	var average_rating float64
+
+	err := repo.DB.
+		Model(&models.Rating{}).
+		Select("AVG(score)").
+		Where("vendor_id = ?", vendor_id).
+		Scan(&average_rating).Error
 	if err != nil {
-		return nil, fmt.Errorf("failed to fetch inserted vendor: %w", err)
+		return fmt.Errorf("failed to calculate average rating: %w", err)
 	}
 
-	return &created, nil
+	err = repo.DB.
+		Model(&models.Vendor{}).
+		Where("id = ?", vendor_id).
+		Update("average_rating", average_rating).Error
+	if err != nil {
+		return fmt.Errorf("failed to update vendor average_rating: %w", err)
+	}
+
+	return nil
 }
 
-func (r *VendorRepository) CheckVendorExists(vendor_id int64) (bool, error) {
-	var exists bool
-	err := r.DB.QueryRow("SELECT EXISTS(SELECT 1 FROM vendors WHERE id = ?)", vendor_id).Scan(&exists)
-	return exists, err
-}
+func (repo *VendorRepository) GetVendorById(vendor_id int64) (*models.Vendor, error) {
+	var vendor models.Vendor
 
-func (r *VendorRepository) UpdateAverageRating(vendor_id int64) error {
-	_, err := r.DB.Exec(`
-		UPDATE vendors
-		SET average_rating = (
-			SELECT AVG(score) FROM ratings WHERE vendor_id = ?
-		)
-		WHERE id = ?`, vendor_id, vendor_id)
-	return err
-}
-
-func (repo *VendorRepository) GetVendorById(vendor_id int64) (*Vendor, error) {
-	var vendor Vendor
-	err := DB.QueryRow(
-		"SELECT id, name, description, average_rating, created_at FROM vendors WHERE id = ?",
-		vendor_id,
-	).Scan(&vendor.ID, &vendor.Name, &vendor.Description, &vendor.AverageRating, &vendor.CreatedAt)
+	err := repo.DB.First(&vendor, vendor_id).Error
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch vendor: %w", err)
 	}
