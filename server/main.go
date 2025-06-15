@@ -14,9 +14,14 @@ func main() {
 
 	vendorRepo := repository.NewVendorRepository(db)
 	ratingRepo := repository.NewRatingRepository(db)
+	userRepo := repository.NewUserRepository(db)
+	authRepo := repository.NewAuthRepository(db)
 
 	vendorHandler := handlers.NewVendorHandler(vendorRepo)
 	ratingHandler := handlers.NewRatingHandler(ratingRepo, vendorRepo)
+	userHandler := handlers.NewUserHandler(userRepo, authRepo)
+
+	router.POST("/users", userHandler.Register)
 
 	router.GET("/vendors", vendorHandler.GetVendors)
 	router.POST("/vendors", vendorHandler.AddNewVendor)
