@@ -119,3 +119,46 @@ func (handler *RatingHandler) GetRatingById(ctx *gin.Context) {
 		Data:    rating,
 	})
 }
+
+func (handler *RatingHandler) GetRatingsByVendorId(ctx *gin.Context) {
+	vendor_id_param := ctx.Param("vendor_id")
+	vendor_id, err := strconv.ParseInt(vendor_id_param, 10, 64)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, utils.HTTPResponse{
+			Success: false,
+			Error:   "Invalid vendor_id",
+		})
+		return
+	}
+
+	exists, err := handler.VendorRepo.CheckVendorExists(vendor_id)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, utils.HTTPResponse{
+			Success: false,
+			Error:   "Something went wrong checking vendor_id, please try again: " + err.Error(),
+		})
+		return
+	}
+	if !exists {
+		ctx.JSON(http.StatusNotFound, utils.HTTPResponse{
+			Success: false,
+			Error:   "Vendor not found",
+		})
+		return
+	}
+
+	ratings, err := handler.RatingRepo.GetRatingsByVendorId(vendor_id)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, utils.HTTPResponse{
+			Success: false,
+			Error:   "Failed to fetch ratings" + err.Error(),
+		})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, utils.HTTPResponse{
+		Success: true,
+		Message: "Successfully fetched Ratings",
+		Data:    ratings,
+	})
+}

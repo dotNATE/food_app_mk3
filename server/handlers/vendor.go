@@ -79,7 +79,7 @@ func (handler *VendorHandler) GetVendorById(ctx *gin.Context) {
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, utils.HTTPResponse{
 			Success: false,
-			Error:   err.Error(),
+			Error:   "Failed fetching vendor: " + err.Error(),
 		})
 	}
 

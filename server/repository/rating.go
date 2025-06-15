@@ -61,3 +61,24 @@ func (repo *RatingRepository) GetRatingById(rating_id int64, vendor_id int64) (*
 
 	return &rating, nil
 }
+
+func (repo *RatingRepository) GetRatingsByVendorId(vendor_id int64) ([]Rating, error) {
+	rows, err := DB.Query("SELECT id, vendor_id, score, review, created_at FROM ratings WHERE vendor_id = ?", vendor_id)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var ratings []Rating
+	for rows.Next() {
+		var r Rating
+		err := rows.Scan(&r.ID, &r.VendorId, &r.Score, &r.Review, &r.CreatedAt)
+		if err != nil {
+			return nil, err
+		}
+
+		ratings = append(ratings, r)
+	}
+
+	return ratings, nil
+}
