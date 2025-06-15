@@ -15,6 +15,8 @@ This personal project aims to:
 - Add and edit restaurant/café entries (admins only?)
 - Filter/search by dietary requirements, rating and proximity to a given location
 - Where feasible, use API to check booking availablility
+- Input validation
+- Authentication middleware
 
 ## Why?
 
