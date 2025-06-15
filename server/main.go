@@ -20,8 +20,11 @@ func main() {
 	vendorHandler := handlers.NewVendorHandler(vendorRepo)
 	ratingHandler := handlers.NewRatingHandler(ratingRepo, vendorRepo)
 	userHandler := handlers.NewUserHandler(userRepo, authRepo)
+	authHandler := handlers.NewAuthHandler(authRepo, userRepo)
 
 	router.POST("/users", userHandler.Register)
+
+	router.POST("auth/login", authHandler.Login)
 
 	router.GET("/vendors", vendorHandler.GetVendors)
 	router.POST("/vendors", vendorHandler.AddNewVendor)

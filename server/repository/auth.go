@@ -23,3 +23,14 @@ func (repo *AuthRepository) InsertAuthIdentity(auth models.AuthIdentity) (*model
 
 	return &auth, nil
 }
+
+func (repo *AuthRepository) GetAuthByUserId(user_id int64) (*models.AuthIdentity, error) {
+	var auth_identity models.AuthIdentity
+
+	err := repo.DB.First(&auth_identity).Where("user_id = ?", user_id).Error
+	if err != nil {
+		return nil, fmt.Errorf("failed to fetch auth identity: %w", err)
+	}
+
+	return &auth_identity, nil
+}
