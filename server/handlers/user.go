@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"fmt"
 	"main/models"
 	utils "main/pkg"
 	"main/repository"
@@ -71,6 +72,7 @@ func (handler *UserHandler) Register(ctx *gin.Context) {
 		return
 	}
 
+	ctx.Header("Location", fmt.Sprintf("users/%d", user.ID))
 	ctx.JSON(http.StatusCreated, utils.HTTPResponse{
 		Success: true,
 		Message: "User successfully created",
