@@ -30,37 +30,25 @@ func (handler *AuthHandler) Login(ctx *gin.Context) {
 
 	err := ctx.ShouldBindJSON(&input)
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, utils.HTTPResponse{
-			Success: false,
-			Error:   "Invalid input: " + err.Error(),
-		})
+		ctx.JSON(http.StatusBadRequest, utils.CreateErrorHTTPResponse("Invalid input: ", err))
 		return
 	}
 
 	user, err := handler.UserRepo.GetUserByEmail(input.Email)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, utils.HTTPResponse{
-			Success: false,
-			Error:   "Something went wrong checking user, please try again: " + err.Error(),
-		})
+		ctx.JSON(http.StatusInternalServerError, utils.CreateErrorHTTPResponse("Something went wrong checking user, please try again: ", err))
 		return
 	}
 
 	auth_identity, err := handler.AuthRepo.GetAuthByUserId(user.ID)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, utils.HTTPResponse{
-			Success: false,
-			Error:   "Something went wrong checking auth credentials, please try again: " + err.Error(),
-		})
+		ctx.JSON(http.StatusInternalServerError, utils.CreateErrorHTTPResponse("Something went wrong checking auth credentials, please try again: ", err))
 		return
 	}
 
 	err = bcrypt.CompareHashAndPassword([]byte(auth_identity.Password), []byte(input.Password))
 	if err != nil {
-		ctx.JSON(http.StatusUnauthorized, utils.HTTPResponse{
-			Success: false,
-			Message: "Invalid credentials",
-		})
+		ctx.JSON(http.StatusUnauthorized, utils.CreateErrorHTTPResponse("Invalid credentials", nil))
 		return
 	}
 
@@ -71,15 +59,9 @@ func (handler *AuthHandler) Login(ctx *gin.Context) {
 
 	tokenString, err := token.SignedString(JwtSecret) // TODO NATE obviously move this to a .env
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, utils.HTTPResponse{
-			Success: false,
-			Message: "Token creation failed: " + err.Error(),
-		})
+		ctx.JSON(http.StatusInternalServerError, utils.CreateErrorHTTPResponse("Token creation failed: ", err))
 		return
 	}
 
-	ctx.JSON(http.StatusOK, utils.HTTPResponse{
-		Success: true,
-		Data:    tokenString,
-	})
+	ctx.JSON(http.StatusOK, utils.CreateSuccessfulHTTPResponse("Login successful", tokenString))
 }

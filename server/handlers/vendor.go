@@ -22,18 +22,11 @@ func NewVendorHandler(vendorRepo *repository.VendorRepository) *VendorHandler {
 func (handler *VendorHandler) GetVendors(ctx *gin.Context) {
 	vendors, err := handler.VendorRepo.GetAllVendors()
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, utils.HTTPResponse{
-			Success: false,
-			Error:   "There was a problem fetching the vendors: " + err.Error(),
-		})
+		ctx.JSON(http.StatusInternalServerError, utils.CreateErrorHTTPResponse("There was a problem fetching the vendors: ", err))
 		return
 	}
 
-	ctx.JSON(http.StatusOK, utils.HTTPResponse{
-		Success: true,
-		Message: "Successfully fetched all vendors",
-		Data:    vendors,
-	})
+	ctx.JSON(http.StatusOK, utils.CreateSuccessfulHTTPResponse("Successfully fetched all vendors", vendors))
 }
 
 func (handler *VendorHandler) AddNewVendor(ctx *gin.Context) {
@@ -41,52 +34,32 @@ func (handler *VendorHandler) AddNewVendor(ctx *gin.Context) {
 
 	err := ctx.ShouldBindJSON(&new_vendor)
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, utils.HTTPResponse{
-			Success: false,
-			Error:   "Invalid input: " + err.Error(),
-		})
+		ctx.JSON(http.StatusBadRequest, utils.CreateErrorHTTPResponse("Invalid input: ", err))
 		return
 	}
 
 	vendor, err := handler.VendorRepo.InsertVendor(new_vendor)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, utils.HTTPResponse{
-			Success: false,
-			Error:   "Failed to insert vendor: " + err.Error(),
-		})
+		ctx.JSON(http.StatusInternalServerError, utils.CreateErrorHTTPResponse("Failed to insert vendor: ", err))
 		return
 	}
 
 	ctx.Header("Location", fmt.Sprintf("vendors/%d", vendor.ID))
-	ctx.JSON(http.StatusCreated, utils.HTTPResponse{
-		Success: true,
-		Message: "Vendor created successfully",
-		Data:    vendor,
-	})
+	ctx.JSON(http.StatusCreated, utils.CreateSuccessfulHTTPResponse("Vendor created successfully", vendor))
 }
 
 func (handler *VendorHandler) GetVendorById(ctx *gin.Context) {
 	vendor_id_param := ctx.Param("vendor_id")
 	vendor_id, err := strconv.ParseInt(vendor_id_param, 10, 64)
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, utils.HTTPResponse{
-			Success: false,
-			Error:   "Invalid vendor id, must be a number: " + err.Error(),
-		})
+		ctx.JSON(http.StatusBadRequest, utils.CreateErrorHTTPResponse("Invalid vendor id, must be a number: ", err))
 		return
 	}
 
 	vendor, err := handler.VendorRepo.GetVendorById(vendor_id)
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, utils.HTTPResponse{
-			Success: false,
-			Error:   "Failed fetching vendor: " + err.Error(),
-		})
+		ctx.JSON(http.StatusBadRequest, utils.CreateErrorHTTPResponse("Failed fetching vendor: ", err))
 	}
 
-	ctx.JSON(http.StatusOK, utils.HTTPResponse{
-		Success: true,
-		Message: "Successfully fetched vendor",
-		Data:    vendor,
-	})
+	ctx.JSON(http.StatusOK, utils.CreateSuccessfulHTTPResponse("Successfully fetched vendor", vendor))
 }

@@ -32,19 +32,13 @@ func (handler *UserHandler) Register(ctx *gin.Context) {
 
 	err := ctx.ShouldBindJSON(&input)
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, utils.HTTPResponse{
-			Success: false,
-			Error:   "Invalid input",
-		})
+		ctx.JSON(http.StatusBadRequest, utils.CreateErrorHTTPResponse("Invalid input", nil))
 		return
 	}
 
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(input.Password), bcrypt.DefaultCost)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, utils.HTTPResponse{
-			Success: false,
-			Error:   "Error hashing password: " + err.Error(),
-		})
+		ctx.JSON(http.StatusInternalServerError, utils.CreateErrorHTTPResponse("Error hashing password: ", err))
 		return
 	}
 
@@ -53,10 +47,7 @@ func (handler *UserHandler) Register(ctx *gin.Context) {
 		Name:  input.Name,
 	})
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, utils.HTTPResponse{
-			Success: false,
-			Error:   "Error creating user: " + err.Error(),
-		})
+		ctx.JSON(http.StatusInternalServerError, utils.CreateErrorHTTPResponse("Error creating user: ", err))
 		return
 	}
 
@@ -65,17 +56,10 @@ func (handler *UserHandler) Register(ctx *gin.Context) {
 		Password: string(hashedPassword),
 	})
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, utils.HTTPResponse{
-			Success: false,
-			Error:   "Error creating authentication identity: " + err.Error(),
-		})
+		ctx.JSON(http.StatusInternalServerError, utils.CreateErrorHTTPResponse("Error creating authentication identity: ", err))
 		return
 	}
 
 	ctx.Header("Location", fmt.Sprintf("users/%d", user.ID))
-	ctx.JSON(http.StatusCreated, utils.HTTPResponse{
-		Success: true,
-		Message: "User successfully created",
-		Data:    user,
-	})
+	ctx.JSON(http.StatusCreated, utils.CreateSuccessfulHTTPResponse("User successfully created", user))
 }
