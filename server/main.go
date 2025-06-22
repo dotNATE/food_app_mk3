@@ -2,6 +2,7 @@ package main
 
 import (
 	"main/handlers"
+	"main/pkg/middleware"
 	"main/repository"
 
 	"github.com/gin-gonic/gin"
@@ -22,16 +23,18 @@ func main() {
 	userHandler := handlers.NewUserHandler(userRepo, authRepo)
 	authHandler := handlers.NewAuthHandler(authRepo, userRepo)
 
-	router.POST("/users", userHandler.Register)
+	router.POST("/auth/register", userHandler.Register)
+	router.POST("/auth/login", authHandler.Login)
 
-	router.POST("auth/login", authHandler.Login)
+	vendors := router.Group("/vendors")
+	vendors.Use(middleware.JWTAuthMiddleware())
 
-	router.GET("/vendors", vendorHandler.GetVendors)
-	router.POST("/vendors", vendorHandler.AddNewVendor)
-	router.GET("/vendors/:vendor_id", vendorHandler.GetVendorById)
-	router.GET("/vendors/:vendor_id/ratings", ratingHandler.GetRatingsByVendorId)
-	router.POST("/vendors/:vendor_id/ratings", ratingHandler.AddNewRating)
-	router.GET("/vendors/:vendor_id/ratings/:rating_id", ratingHandler.GetRatingById)
+	vendors.GET("/", vendorHandler.GetVendors)
+	vendors.POST("/", vendorHandler.AddNewVendor)
+	vendors.GET("/:vendor_id", vendorHandler.GetVendorById)
+	vendors.GET("/:vendor_id/ratings", ratingHandler.GetRatingsByVendorId)
+	vendors.POST("/:vendor_id/ratings", ratingHandler.AddNewRating)
+	vendors.GET("/:vendor_id/ratings/:rating_id", ratingHandler.GetRatingById)
 
 	router.Run(":8080")
 }
