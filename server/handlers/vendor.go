@@ -3,7 +3,7 @@ package handlers
 import (
 	"fmt"
 	"main/models"
-	utils "main/pkg"
+	utils "main/pkg/utils"
 	"main/repository"
 	"net/http"
 	"strconv"

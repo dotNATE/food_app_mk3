@@ -1,7 +1,7 @@
 package handlers
 
 import (
-	utils "main/pkg"
+	utils "main/pkg/utils"
 	"main/repository"
 	"net/http"
 	"time"
@@ -57,7 +57,7 @@ func (handler *AuthHandler) Login(ctx *gin.Context) {
 		"exp":     time.Now().Add(time.Hour * 1).Unix(),
 	})
 
-	tokenString, err := token.SignedString(JwtSecret) // TODO NATE obviously move this to a .env
+	tokenString, err := token.SignedString(JwtSecret)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, utils.CreateErrorHTTPResponse("Token creation failed: ", err))
 		return
