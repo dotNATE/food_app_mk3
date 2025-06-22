@@ -31,8 +31,11 @@ func JWTAuthMiddleware() gin.HandlerFunc {
 			return
 		}
 
-		if claims, ok := token.Claims.(jwt.MapClaims); ok {
-			ctx.Set("claims", claims)
+		claims, ok := token.Claims.(jwt.MapClaims)
+		if ok {
+			user_id := claims["user_id"]
+
+			ctx.Set("user_id", user_id)
 			ctx.Next()
 		} else {
 			ctx.AbortWithStatusJSON(http.StatusUnauthorized, utils.CreateErrorHTTPResponse("Invalid token claims", nil))

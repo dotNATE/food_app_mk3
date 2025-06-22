@@ -38,6 +38,13 @@ func (handler *VendorHandler) AddNewVendor(ctx *gin.Context) {
 		return
 	}
 
+	user_id, err := utils.GetUserIdFromContext(ctx)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, utils.CreateErrorHTTPResponse("Issue getting user_id from context: ", err))
+		return
+	}
+
+	new_vendor.CreatedBy = user_id
 	vendor, err := handler.VendorRepo.InsertVendor(new_vendor)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, utils.CreateErrorHTTPResponse("Failed to insert vendor: ", err))
