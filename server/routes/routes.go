@@ -4,6 +4,7 @@ import (
 	"main/handlers"
 	"main/pkg/middleware"
 	"main/repository"
+	"main/service"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -15,9 +16,11 @@ func RegisterRoutes(router *gin.Engine, db *gorm.DB) {
 	userRepo := repository.NewUserRepository(db)
 	authRepo := repository.NewAuthRepository(db)
 
+	userService := service.NewUserService(userRepo, authRepo)
+
 	vendorHandler := handlers.NewVendorHandler(vendorRepo)
 	ratingHandler := handlers.NewRatingHandler(ratingRepo, vendorRepo)
-	userHandler := handlers.NewUserHandler(userRepo, authRepo)
+	userHandler := handlers.NewUserHandler(userService)
 	authHandler := handlers.NewAuthHandler(authRepo, userRepo)
 
 	router.POST("/auth/register", userHandler.Register)

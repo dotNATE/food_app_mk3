@@ -2,33 +2,28 @@ package handlers
 
 import (
 	"fmt"
-	"main/models"
+	"main/dto"
 	utils "main/pkg/utils"
-	"main/repository"
+	"main/service"
 	"net/http"
+	"os"
 
 	"github.com/gin-gonic/gin"
-	"golang.org/x/crypto/bcrypt"
 )
 
 type UserHandler struct {
-	UserRepo *repository.UserRepository
-	AuthRepo *repository.AuthRepository
+	UserService *service.UserService
 }
 
-func NewUserHandler(userRepo *repository.UserRepository, authRepo *repository.AuthRepository) *UserHandler {
+func NewUserHandler(userService *service.UserService) *UserHandler {
 	return &UserHandler{
-		UserRepo: userRepo,
-		AuthRepo: authRepo,
+		UserService: userService,
 	}
 }
 
 func (handler *UserHandler) Register(ctx *gin.Context) {
-	var input struct {
-		Email    string `json:"email"`
-		Name     string `json:"name"`
-		Password string `json:"password"`
-	}
+	app_url := os.Getenv("APP_URL")
+	var input dto.RegisterRequest
 
 	err := ctx.ShouldBindJSON(&input)
 	if err != nil {
@@ -36,30 +31,12 @@ func (handler *UserHandler) Register(ctx *gin.Context) {
 		return
 	}
 
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(input.Password), bcrypt.DefaultCost)
+	user, err := handler.UserService.RegisterNewUser(&input)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, utils.CreateErrorHTTPResponse("Error hashing password: ", err))
+		ctx.JSON(http.StatusInternalServerError, utils.CreateErrorHTTPResponse("Error registering new user: ", err))
 		return
 	}
 
-	user, err := handler.UserRepo.InsertUser(models.User{
-		Email: input.Email,
-		Name:  input.Name,
-	})
-	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, utils.CreateErrorHTTPResponse("Error creating user: ", err))
-		return
-	}
-
-	_, err = handler.AuthRepo.InsertAuthIdentity(models.AuthIdentity{
-		UserId:   user.ID,
-		Password: string(hashedPassword),
-	})
-	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, utils.CreateErrorHTTPResponse("Error creating authentication identity: ", err))
-		return
-	}
-
-	ctx.Header("Location", fmt.Sprintf("users/%d", user.ID))
+	ctx.Header("Location", fmt.Sprintf("%s/users/%d", app_url, user.ID)) // TODO implement this route!
 	ctx.JSON(http.StatusCreated, utils.CreateSuccessfulHTTPResponse("User successfully created", user))
 }

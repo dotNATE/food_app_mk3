@@ -18,7 +18,7 @@ func NewUserRepository(db *gorm.DB) *UserRepository {
 func (repo *UserRepository) InsertUser(user models.User) (*models.User, error) {
 	err := repo.DB.Create(&user).Error
 	if err != nil {
-		return nil, fmt.Errorf("failed to insert user: %w", err)
+		return nil, err
 	}
 
 	return &user, nil
