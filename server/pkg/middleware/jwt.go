@@ -3,14 +3,15 @@ package middleware
 import (
 	"main/pkg/utils"
 	"net/http"
+	"os"
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
 )
 
-var JwtSecret = []byte("my-secret") // TODO move this to .env
-
 func JWTAuthMiddleware() gin.HandlerFunc {
+	jwt_secret := []byte(os.Getenv("JWT_SECRET"))
+
 	return func(ctx *gin.Context) {
 		authHeader := ctx.GetHeader("token")
 		if authHeader == "" {
@@ -23,7 +24,7 @@ func JWTAuthMiddleware() gin.HandlerFunc {
 			if !ok {
 				return nil, jwt.ErrTokenUnverifiable
 			}
-			return JwtSecret, nil
+			return jwt_secret, nil
 		})
 
 		if err != nil || !token.Valid {

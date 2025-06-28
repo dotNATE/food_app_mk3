@@ -1,14 +1,26 @@
 package main
 
 import (
+	"log"
 	"main/handlers"
 	"main/pkg/middleware"
 	"main/repository"
+	"os"
 
 	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
 )
 
+func init() {
+	err := godotenv.Load()
+	if err != nil {
+		log.Println("No .env file found")
+	}
+}
+
 func main() {
+	port := os.Getenv("PORT")
+
 	db := repository.InitDB()
 
 	router := gin.Default()
@@ -36,5 +48,5 @@ func main() {
 	vendors.POST("/:vendor_id/ratings", ratingHandler.AddNewRating)
 	vendors.GET("/:vendor_id/ratings/:rating_id", ratingHandler.GetRatingById)
 
-	router.Run(":8080")
+	router.Run(":" + port)
 }

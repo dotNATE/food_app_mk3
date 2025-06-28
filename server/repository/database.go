@@ -2,6 +2,7 @@ package repository
 
 import (
 	"log"
+	"os"
 
 	"main/models"
 
@@ -10,9 +11,9 @@ import (
 )
 
 func InitDB() *gorm.DB {
-	dsn := "root:password@tcp(database:3306)/food_app?charset=utf8mb4&parseTime=True&loc=Local"
+	db_url := os.Getenv("DATABASE_URL")
 
-	DB, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
+	DB, err := gorm.Open(mysql.Open(db_url), &gorm.Config{})
 	if err != nil {
 		log.Fatalf("Failed to connect to database: %v", err)
 	}

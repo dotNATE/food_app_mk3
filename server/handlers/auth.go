@@ -4,6 +4,7 @@ import (
 	utils "main/pkg/utils"
 	"main/repository"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -20,9 +21,9 @@ func NewAuthHandler(authRepo *repository.AuthRepository, userRepo *repository.Us
 	return &AuthHandler{AuthRepo: authRepo, UserRepo: userRepo}
 }
 
-var JwtSecret = []byte("my-secret") // TODO move this to .env
-
 func (handler *AuthHandler) Login(ctx *gin.Context) {
+	jwt_secret := []byte(os.Getenv("JWT_SECRET"))
+
 	var input struct {
 		Email    string `json:"email"`
 		Password string `json:"password"`
@@ -57,7 +58,7 @@ func (handler *AuthHandler) Login(ctx *gin.Context) {
 		"exp":     time.Now().Add(time.Hour * 1).Unix(),
 	})
 
-	tokenString, err := token.SignedString(JwtSecret)
+	tokenString, err := token.SignedString(jwt_secret)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, utils.CreateErrorHTTPResponse("Token creation failed: ", err))
 		return
