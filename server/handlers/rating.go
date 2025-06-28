@@ -6,6 +6,7 @@ import (
 	utils "main/pkg/utils"
 	"main/repository"
 	"net/http"
+	"os"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
@@ -21,6 +22,7 @@ func NewRatingHandler(ratingRepo *repository.RatingRepository, vendorRepo *repos
 }
 
 func (handler *RatingHandler) AddNewRating(ctx *gin.Context) {
+	app_url := os.Getenv("APP_URL")
 	var new_rating models.Rating
 	vendor_id_param := ctx.Param("vendor_id")
 
@@ -59,7 +61,7 @@ func (handler *RatingHandler) AddNewRating(ctx *gin.Context) {
 		return
 	}
 
-	ctx.Header("Location", fmt.Sprintf("vendors/%d/ratings/%d", rating.VendorId, rating.ID))
+	ctx.Header("Location", fmt.Sprintf("%s/vendors/%d/ratings/%d", app_url, rating.VendorId, rating.ID))
 	ctx.JSON(http.StatusCreated, utils.CreateSuccessfulHTTPResponse("Rating created successfully", rating))
 }
 

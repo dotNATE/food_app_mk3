@@ -6,6 +6,7 @@ import (
 	utils "main/pkg/utils"
 	"main/repository"
 	"net/http"
+	"os"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
@@ -30,6 +31,7 @@ func (handler *VendorHandler) GetVendors(ctx *gin.Context) {
 }
 
 func (handler *VendorHandler) AddNewVendor(ctx *gin.Context) {
+	app_url := os.Getenv("APP_URL")
 	var new_vendor models.Vendor
 
 	err := ctx.ShouldBindJSON(&new_vendor)
@@ -51,7 +53,7 @@ func (handler *VendorHandler) AddNewVendor(ctx *gin.Context) {
 		return
 	}
 
-	ctx.Header("Location", fmt.Sprintf("vendors/%d", vendor.ID))
+	ctx.Header("Location", fmt.Sprintf("%s/vendors/%d", app_url, vendor.ID))
 	ctx.JSON(http.StatusCreated, utils.CreateSuccessfulHTTPResponse("Vendor created successfully", vendor))
 }
 
