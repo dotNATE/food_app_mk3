@@ -15,12 +15,12 @@ func NewVendorRepository(db *gorm.DB) *VendorRepository {
 	return &VendorRepository{DB: db}
 }
 
-func (repo *VendorRepository) GetAllVendors() ([]models.Vendor, error) {
-	var vendors []models.Vendor
+func (repo *VendorRepository) GetAllVendors() ([]*models.Vendor, error) {
+	var vendors []*models.Vendor
 
 	err := repo.DB.Find(&vendors).Error
 	if err != nil {
-		return nil, fmt.Errorf("failed to query vendors: %w", err)
+		return nil, err
 	}
 
 	return vendors, nil
@@ -29,7 +29,7 @@ func (repo *VendorRepository) GetAllVendors() ([]models.Vendor, error) {
 func (repo *VendorRepository) InsertVendor(vendor models.Vendor) (*models.Vendor, error) {
 	err := repo.DB.Create(&vendor).Error
 	if err != nil {
-		return nil, fmt.Errorf("failed to insert vendor: %w", err)
+		return nil, err
 	}
 
 	return &vendor, nil

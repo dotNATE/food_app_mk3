@@ -2,9 +2,9 @@ package handlers
 
 import (
 	"fmt"
-	"main/models"
+	"main/dto"
 	utils "main/pkg/utils"
-	"main/repository"
+	"main/service"
 	"net/http"
 	"os"
 	"strconv"
@@ -13,15 +13,17 @@ import (
 )
 
 type VendorHandler struct {
-	VendorRepo *repository.VendorRepository
+	VendorService *service.VendorService
 }
 
-func NewVendorHandler(vendorRepo *repository.VendorRepository) *VendorHandler {
-	return &VendorHandler{VendorRepo: vendorRepo}
+func NewVendorHandler(vendorService *service.VendorService) *VendorHandler {
+	return &VendorHandler{
+		VendorService: vendorService,
+	}
 }
 
 func (handler *VendorHandler) GetVendors(ctx *gin.Context) {
-	vendors, err := handler.VendorRepo.GetAllVendors()
+	vendors, err := handler.VendorService.GetAllVendors()
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, utils.CreateErrorHTTPResponse("There was a problem fetching the vendors: ", err))
 		return
@@ -32,8 +34,8 @@ func (handler *VendorHandler) GetVendors(ctx *gin.Context) {
 
 func (handler *VendorHandler) AddNewVendor(ctx *gin.Context) {
 	app_url := os.Getenv("APP_URL")
-	var new_vendor models.Vendor
 
+	var new_vendor *dto.AddVendorRequest
 	err := ctx.ShouldBindJSON(&new_vendor)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, utils.CreateErrorHTTPResponse("Invalid input: ", err))
@@ -46,8 +48,7 @@ func (handler *VendorHandler) AddNewVendor(ctx *gin.Context) {
 		return
 	}
 
-	new_vendor.CreatedBy = user_id
-	vendor, err := handler.VendorRepo.InsertVendor(new_vendor)
+	vendor, err := handler.VendorService.CreateNewVendor(new_vendor, user_id)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, utils.CreateErrorHTTPResponse("Failed to insert vendor: ", err))
 		return
@@ -65,9 +66,10 @@ func (handler *VendorHandler) GetVendorById(ctx *gin.Context) {
 		return
 	}
 
-	vendor, err := handler.VendorRepo.GetVendorById(vendor_id)
+	vendor, err := handler.VendorService.GetVendorById(vendor_id)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, utils.CreateErrorHTTPResponse("Failed fetching vendor: ", err))
+		return
 	}
 
 	ctx.JSON(http.StatusOK, utils.CreateSuccessfulHTTPResponse("Successfully fetched vendor", vendor))

@@ -18,8 +18,9 @@ func RegisterRoutes(router *gin.Engine, db *gorm.DB) {
 
 	userService := service.NewUserService(userRepo, authRepo)
 	authService := service.NewAuthService(userRepo, authRepo)
+	vendorService := service.NewVendorService(vendorRepo)
 
-	vendorHandler := handlers.NewVendorHandler(vendorRepo)
+	vendorHandler := handlers.NewVendorHandler(vendorService)
 	ratingHandler := handlers.NewRatingHandler(ratingRepo, vendorRepo)
 	userHandler := handlers.NewUserHandler(userService)
 	authHandler := handlers.NewAuthHandler(userService, authService)
