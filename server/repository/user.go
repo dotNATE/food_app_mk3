@@ -40,7 +40,7 @@ func (repo *UserRepository) GetUserByEmail(email string) (*models.User, error) {
 
 	err := repo.DB.First(&user).Where("email = ?", email).Error
 	if err != nil {
-		return nil, fmt.Errorf("failed to fetch user: %w", err)
+		return nil, err
 	}
 
 	return &user, nil

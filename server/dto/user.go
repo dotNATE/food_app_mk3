@@ -1,7 +1,10 @@
 package dto
 
-type NameAndEmailFields struct {
-	Name  string `json:"name" binding:"required,max=191"`
+type NameField struct {
+	Name string `json:"name" binding:"required,max=191"`
+}
+
+type EmailField struct {
 	Email string `json:"email" binding:"required,email,max=191"`
 }
 
@@ -10,7 +13,8 @@ type PasswordField struct {
 }
 
 type RegisterRequest struct {
-	NameAndEmailFields
+	NameField
+	EmailField
 	PasswordField
 }
 

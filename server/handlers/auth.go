@@ -1,8 +1,9 @@
 package handlers
 
 import (
+	"main/dto"
 	utils "main/pkg/utils"
-	"main/repository"
+	"main/service"
 	"net/http"
 	"os"
 	"time"
@@ -13,35 +14,31 @@ import (
 )
 
 type AuthHandler struct {
-	AuthRepo *repository.AuthRepository
-	UserRepo *repository.UserRepository
+	UserService *service.UserService
+	AuthService *service.AuthService
 }
 
-func NewAuthHandler(authRepo *repository.AuthRepository, userRepo *repository.UserRepository) *AuthHandler {
-	return &AuthHandler{AuthRepo: authRepo, UserRepo: userRepo}
+func NewAuthHandler(userService *service.UserService, authService *service.AuthService) *AuthHandler {
+	return &AuthHandler{UserService: userService, AuthService: authService}
 }
 
 func (handler *AuthHandler) Login(ctx *gin.Context) {
 	jwt_secret := []byte(os.Getenv("JWT_SECRET"))
 
-	var input struct {
-		Email    string `json:"email"`
-		Password string `json:"password"`
-	}
-
+	var input *dto.LoginRequest
 	err := ctx.ShouldBindJSON(&input)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, utils.CreateErrorHTTPResponse("Invalid input: ", err))
 		return
 	}
 
-	user, err := handler.UserRepo.GetUserByEmail(input.Email)
+	user, err := handler.UserService.GetUserByEmail(input.Email)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, utils.CreateErrorHTTPResponse("Something went wrong checking user, please try again: ", err))
 		return
 	}
 
-	auth_identity, err := handler.AuthRepo.GetAuthByUserId(user.ID)
+	auth_identity, err := handler.AuthService.GetAuthIdentityByUserId(user.ID)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, utils.CreateErrorHTTPResponse("Something went wrong checking auth credentials, please try again: ", err))
 		return

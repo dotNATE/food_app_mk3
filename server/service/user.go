@@ -48,3 +48,16 @@ func (service *UserService) RegisterNewUser(register_request *dto.RegisterReques
 		Name:  user.Name,
 	}, nil
 }
+
+func (service *UserService) GetUserByEmail(email string) (*dto.UserResponse, error) {
+	user, err := service.UserRepo.GetUserByEmail(email)
+	if err != nil {
+		return nil, err
+	}
+
+	return &dto.UserResponse{
+		ID:    user.ID,
+		Email: user.Email,
+		Name:  user.Name,
+	}, nil
+}

@@ -17,14 +17,18 @@ func RegisterRoutes(router *gin.Engine, db *gorm.DB) {
 	authRepo := repository.NewAuthRepository(db)
 
 	userService := service.NewUserService(userRepo, authRepo)
+	authService := service.NewAuthService(userRepo, authRepo)
 
 	vendorHandler := handlers.NewVendorHandler(vendorRepo)
 	ratingHandler := handlers.NewRatingHandler(ratingRepo, vendorRepo)
 	userHandler := handlers.NewUserHandler(userService)
-	authHandler := handlers.NewAuthHandler(authRepo, userRepo)
+	authHandler := handlers.NewAuthHandler(userService, authService)
 
-	router.POST("/auth/register", userHandler.Register)
-	router.POST("/auth/login", authHandler.Login)
+	auth := router.Group("/auth")
+	{
+		auth.POST("/register", userHandler.Register)
+		auth.POST("/login", authHandler.Login)
+	}
 
 	vendors := router.Group("/vendors")
 	vendors.Use(middleware.JWTAuthMiddleware())
