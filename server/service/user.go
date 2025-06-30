@@ -61,3 +61,16 @@ func (service *UserService) GetUserByEmail(email string) (*dto.UserResponse, err
 		Name:  user.Name,
 	}, nil
 }
+
+func (service *UserService) GetUserById(user_id int64) (*dto.UserResponse, error) {
+	user, err := service.UserRepo.GetUserById(user_id)
+	if err != nil {
+		return nil, err
+	}
+
+	return &dto.UserResponse{
+		ID:    user.ID,
+		Email: user.Email,
+		Name:  user.Name,
+	}, nil
+}

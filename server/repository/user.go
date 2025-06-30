@@ -38,7 +38,18 @@ func (repo *UserRepository) CheckUserExists(email string) (bool, error) {
 func (repo *UserRepository) GetUserByEmail(email string) (*models.User, error) {
 	var user models.User
 
-	err := repo.DB.First(&user).Where("email = ?", email).Error
+	err := repo.DB.Where("email = ?", email).First(&user).Error
+	if err != nil {
+		return nil, err
+	}
+
+	return &user, nil
+}
+
+func (repo *UserRepository) GetUserById(user_id int64) (*models.User, error) {
+	var user models.User
+
+	err := repo.DB.Where("id = ?", user_id).First(&user).Error
 	if err != nil {
 		return nil, err
 	}

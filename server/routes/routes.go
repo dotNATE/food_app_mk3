@@ -32,6 +32,12 @@ func RegisterRoutes(router *gin.Engine, db *gorm.DB) {
 		auth.POST("/login", authHandler.Login)
 	}
 
+	users := router.Group("/users")
+	users.Use(middleware.JWTAuthMiddleware())
+	{
+		users.GET("/:user_id", userHandler.GetUserById)
+	}
+
 	vendors := router.Group("/vendors")
 	vendors.Use(middleware.JWTAuthMiddleware())
 	{
