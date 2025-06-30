@@ -1,7 +1,6 @@
 package repository
 
 import (
-	"fmt"
 	"main/models"
 
 	"gorm.io/gorm"
@@ -40,7 +39,7 @@ func (repo *VendorRepository) CheckVendorExists(vendor_id int64) (bool, error) {
 
 	err := repo.DB.Model(&models.Vendor{}).Where("id = ?", vendor_id).Count(&count).Error
 	if err != nil {
-		return false, fmt.Errorf("failed to check vendor existence: %w", err)
+		return false, err
 	}
 
 	return count > 0, nil
@@ -55,7 +54,7 @@ func (repo *VendorRepository) UpdateAverageRating(vendor_id int64) error {
 		Where("vendor_id = ?", vendor_id).
 		Scan(&average_rating).Error
 	if err != nil {
-		return fmt.Errorf("failed to calculate average rating: %w", err)
+		return err
 	}
 
 	err = repo.DB.
@@ -63,7 +62,7 @@ func (repo *VendorRepository) UpdateAverageRating(vendor_id int64) error {
 		Where("id = ?", vendor_id).
 		Update("average_rating", average_rating).Error
 	if err != nil {
-		return fmt.Errorf("failed to update vendor average_rating: %w", err)
+		return err
 	}
 
 	return nil
@@ -74,7 +73,7 @@ func (repo *VendorRepository) GetVendorById(vendor_id int64) (*models.Vendor, er
 
 	err := repo.DB.First(&vendor, vendor_id).Error
 	if err != nil {
-		return nil, fmt.Errorf("failed to fetch vendor: %w", err)
+		return nil, err
 	}
 
 	return &vendor, nil

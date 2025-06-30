@@ -2,9 +2,10 @@ package handlers
 
 import (
 	"fmt"
-	"main/models"
+	"main/dto"
 	utils "main/pkg/utils"
 	"main/repository"
+	"main/service"
 	"net/http"
 	"os"
 	"strconv"
@@ -13,8 +14,10 @@ import (
 )
 
 type RatingHandler struct {
-	RatingRepo *repository.RatingRepository
-	VendorRepo *repository.VendorRepository
+	RatingRepo    *repository.RatingRepository
+	VendorRepo    *repository.VendorRepository
+	VendorService *service.VendorService
+	RatingService *service.RatingService
 }
 
 func NewRatingHandler(ratingRepo *repository.RatingRepository, vendorRepo *repository.VendorRepository) *RatingHandler {
@@ -23,7 +26,7 @@ func NewRatingHandler(ratingRepo *repository.RatingRepository, vendorRepo *repos
 
 func (handler *RatingHandler) AddNewRating(ctx *gin.Context) {
 	app_url := os.Getenv("APP_URL")
-	var new_rating models.Rating
+	var new_rating *dto.AddRatingRequest
 	vendor_id_param := ctx.Param("vendor_id")
 
 	err := ctx.ShouldBindJSON(&new_rating)
@@ -38,7 +41,7 @@ func (handler *RatingHandler) AddNewRating(ctx *gin.Context) {
 		return
 	}
 
-	vendor_exists, err := handler.VendorRepo.CheckVendorExists(vendor_id)
+	vendor_exists, err := handler.VendorService.CheckVendorExists(vendor_id)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, utils.CreateErrorHTTPResponse("Something went wrong checking vendor_id, please try again: ", err))
 		return
@@ -48,14 +51,13 @@ func (handler *RatingHandler) AddNewRating(ctx *gin.Context) {
 		return
 	}
 
-	new_rating.VendorId = vendor_id
-	rating, err := handler.RatingRepo.InsertRating(new_rating)
+	rating, err := handler.RatingService.CreateNewRating(new_rating, vendor_id)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, utils.CreateErrorHTTPResponse("Failed to insert rating: ", err))
 		return
 	}
 
-	err = handler.VendorRepo.UpdateAverageRating(vendor_id)
+	err = handler.VendorService.UpdateAverageRating(vendor_id)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, utils.CreateErrorHTTPResponse("Failed to update vendor average_rating: ", err))
 		return
@@ -80,7 +82,7 @@ func (handler *RatingHandler) GetRatingById(ctx *gin.Context) {
 		return
 	}
 
-	rating, err := handler.RatingRepo.GetRatingById(rating_id, vendor_id)
+	rating, err := handler.RatingService.GetRatingById(rating_id, vendor_id)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, utils.CreateErrorHTTPResponse("Failed to fetch rating: ", err))
 		return
@@ -97,7 +99,7 @@ func (handler *RatingHandler) GetRatingsByVendorId(ctx *gin.Context) {
 		return
 	}
 
-	exists, err := handler.VendorRepo.CheckVendorExists(vendor_id)
+	exists, err := handler.VendorService.CheckVendorExists(vendor_id)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, utils.CreateErrorHTTPResponse("Something went wrong checking vendor_id, please try again: ", err))
 		return
@@ -107,7 +109,7 @@ func (handler *RatingHandler) GetRatingsByVendorId(ctx *gin.Context) {
 		return
 	}
 
-	ratings, err := handler.RatingRepo.GetRatingsByVendorId(vendor_id)
+	ratings, err := handler.RatingService.GetRatingsByVendorId(vendor_id)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, utils.CreateErrorHTTPResponse("Failed to fetch ratings", err))
 		return

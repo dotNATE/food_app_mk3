@@ -23,8 +23,8 @@ func (service *VendorService) GetAllVendors() ([]*dto.Vendor, error) {
 	}
 
 	result := make([]*dto.Vendor, len(vendors))
-	for index, vendorModel := range vendors {
-		result[index] = dto.ConvertVendorModelToDto(vendorModel)
+	for index, vendor_model := range vendors {
+		result[index] = dto.ConvertVendorModelToDto(vendor_model)
 	}
 
 	return result, nil
@@ -50,4 +50,22 @@ func (service *VendorService) GetVendorById(vendor_id int64) (*dto.Vendor, error
 	}
 
 	return dto.ConvertVendorModelToDto(vendor), nil
+}
+
+func (service *VendorService) CheckVendorExists(vendor_id int64) (bool, error) {
+	vendor_exists, err := service.VendorRepo.CheckVendorExists(vendor_id)
+	if err != nil {
+		return false, err
+	}
+
+	return vendor_exists, nil
+}
+
+func (service *VendorService) UpdateAverageRating(vendor_id int64) error {
+	err := service.VendorRepo.UpdateAverageRating(vendor_id)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
