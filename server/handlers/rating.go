@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"main/dto"
 	utils "main/pkg/utils"
-	"main/repository"
 	"main/service"
 	"net/http"
 	"os"
@@ -14,14 +13,12 @@ import (
 )
 
 type RatingHandler struct {
-	RatingRepo    *repository.RatingRepository
-	VendorRepo    *repository.VendorRepository
 	VendorService *service.VendorService
 	RatingService *service.RatingService
 }
 
-func NewRatingHandler(ratingRepo *repository.RatingRepository, vendorRepo *repository.VendorRepository) *RatingHandler {
-	return &RatingHandler{RatingRepo: ratingRepo, VendorRepo: vendorRepo}
+func NewRatingHandler(ratingService *service.RatingService, vendorService *service.VendorService) *RatingHandler {
+	return &RatingHandler{RatingService: ratingService, VendorService: vendorService}
 }
 
 func (handler *RatingHandler) AddNewRating(ctx *gin.Context) {
