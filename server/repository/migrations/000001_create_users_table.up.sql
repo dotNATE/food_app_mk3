@@ -1,0 +1,11 @@
+START TRANSACTION;
+
+CREATE TABLE users (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255),
+    email VARCHAR(255) UNIQUE,
+    created_at DATETIME,
+    updated_at DATETIME
+);
+
+COMMIT;

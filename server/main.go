@@ -5,6 +5,7 @@ import (
 	"main/repository"
 	"main/routes"
 	"os"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
@@ -20,7 +21,11 @@ func init() {
 func main() {
 	port := os.Getenv("PORT")
 
-	db := repository.InitDB()
+	db, err := repository.ConnectWithRetry(10, 2*time.Second)
+	if err != nil {
+		log.Fatalf("Database connection failed: %v", err)
+	}
+
 	router := gin.Default()
 
 	routes.RegisterRoutes(router, db)

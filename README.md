@@ -32,4 +32,12 @@ OR
 
 ```
 make up
-````
+```
+
+## AWS Services in use
+
+- IAM
+- VPC
+- RDS (MySQL)
+- ECR (forkaround-api)
+- ECS (Fargate)

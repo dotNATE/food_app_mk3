@@ -1,0 +1,15 @@
+START TRANSACTION;
+
+CREATE TABLE auth_identities (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    user_id BIGINT UNSIGNED NOT NULL,
+    password VARCHAR(255) NOT NULL,
+
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    
+    CONSTRAINT fk_authidentity_user FOREIGN KEY (user_id) REFERENCES users(id),
+    INDEX idx_authidentity_user_id (user_id)
+);
+
+COMMIT;
