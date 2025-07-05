@@ -7,10 +7,10 @@ import (
 )
 
 type RatingService struct {
-	RatingRepo *repository.RatingRepository
+	RatingRepo repository.RatingRepository
 }
 
-func NewRatingService(ratingRepo *repository.RatingRepository) *RatingService {
+func NewRatingService(ratingRepo repository.RatingRepository) *RatingService {
 	return &RatingService{
 		RatingRepo: ratingRepo,
 	}

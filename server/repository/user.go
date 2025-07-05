@@ -7,16 +7,24 @@ import (
 	"gorm.io/gorm"
 )
 
-type UserRepository struct {
+type UserRepository interface {
+	InsertUser(tx *gorm.DB, user models.User) (*models.User, error)
+	CheckUserExists(email string) (bool, error)
+	GetUserByEmail(email string) (*models.User, error)
+	GetUserById(user_id int64) (*models.User, error)
+	GetDB() *gorm.DB
+}
+
+type GormUserRepository struct {
 	DB *gorm.DB
 }
 
-func NewUserRepository(db *gorm.DB) *UserRepository {
-	return &UserRepository{DB: db}
+func NewUserRepository(db *gorm.DB) UserRepository {
+	return GormUserRepository{DB: db}
 }
 
-func (repo *UserRepository) InsertUser(user models.User) (*models.User, error) {
-	err := repo.DB.Create(&user).Error
+func (repo GormUserRepository) InsertUser(tx *gorm.DB, user models.User) (*models.User, error) {
+	err := tx.Create(&user).Error
 	if err != nil {
 		return nil, err
 	}
@@ -24,7 +32,7 @@ func (repo *UserRepository) InsertUser(user models.User) (*models.User, error) {
 	return &user, nil
 }
 
-func (repo *UserRepository) CheckUserExists(email string) (bool, error) {
+func (repo GormUserRepository) CheckUserExists(email string) (bool, error) {
 	var count int64
 
 	err := repo.DB.Model(&models.User{}).Where("email = ?", email).Count(&count).Error
@@ -35,7 +43,7 @@ func (repo *UserRepository) CheckUserExists(email string) (bool, error) {
 	return count > 0, nil
 }
 
-func (repo *UserRepository) GetUserByEmail(email string) (*models.User, error) {
+func (repo GormUserRepository) GetUserByEmail(email string) (*models.User, error) {
 	var user models.User
 
 	err := repo.DB.Where("email = ?", email).First(&user).Error
@@ -46,7 +54,7 @@ func (repo *UserRepository) GetUserByEmail(email string) (*models.User, error) {
 	return &user, nil
 }
 
-func (repo *UserRepository) GetUserById(user_id int64) (*models.User, error) {
+func (repo GormUserRepository) GetUserById(user_id int64) (*models.User, error) {
 	var user models.User
 
 	err := repo.DB.Where("id = ?", user_id).First(&user).Error
@@ -55,4 +63,8 @@ func (repo *UserRepository) GetUserById(user_id int64) (*models.User, error) {
 	}
 
 	return &user, nil
+}
+
+func (repo GormUserRepository) GetDB() *gorm.DB {
+	return repo.DB
 }

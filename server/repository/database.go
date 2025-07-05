@@ -44,3 +44,24 @@ func ConnectWithRetry(maxRetries int, delay time.Duration) (*gorm.DB, error) {
 
 	return nil, fmt.Errorf("could not connect to database after %d attempts: %v", maxRetries, err)
 }
+
+func WithTransaction(db *gorm.DB, fn func(tx *gorm.DB) error) error {
+	tx := db.Begin()
+	if tx.Error != nil {
+		return tx.Error
+	}
+
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+			panic(r)
+		}
+	}()
+
+	if err := fn(tx); err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	return tx.Commit().Error
+}

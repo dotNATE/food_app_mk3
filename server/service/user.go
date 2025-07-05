@@ -1,19 +1,21 @@
 package service
 
 import (
+	"fmt"
 	"main/dto"
 	"main/models"
 	"main/repository"
 
 	"golang.org/x/crypto/bcrypt"
+	"gorm.io/gorm"
 )
 
 type UserService struct {
-	UserRepo *repository.UserRepository
-	AuthRepo *repository.AuthRepository
+	UserRepo repository.UserRepository
+	AuthRepo repository.AuthRepository
 }
 
-func NewUserService(userRepo *repository.UserRepository, authRepo *repository.AuthRepository) *UserService {
+func NewUserService(userRepo repository.UserRepository, authRepo repository.AuthRepository) *UserService {
 	return &UserService{
 		UserRepo: userRepo,
 		AuthRepo: authRepo,
@@ -21,12 +23,12 @@ func NewUserService(userRepo *repository.UserRepository, authRepo *repository.Au
 }
 
 func (service *UserService) RegisterNewUser(register_request *dto.RegisterRequest) (*dto.UserResponse, error) {
-	user, err := service.UserRepo.InsertUser(models.User{
-		Email: register_request.Email,
-		Name:  register_request.Name,
-	})
+	user_exists, err := service.UserRepo.CheckUserExists(register_request.Email)
 	if err != nil {
 		return nil, err
+	}
+	if user_exists {
+		return nil, fmt.Errorf("email already in use")
 	}
 
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(register_request.Password), bcrypt.DefaultCost)
@@ -34,9 +36,24 @@ func (service *UserService) RegisterNewUser(register_request *dto.RegisterReques
 		return nil, err
 	}
 
-	_, err = service.AuthRepo.InsertAuthIdentity(models.AuthIdentity{
-		UserId:   user.ID,
-		Password: string(hashedPassword),
+	var user *models.User
+	err = repository.WithTransaction(service.UserRepo.GetDB(), func(tx *gorm.DB) error {
+		user, err = service.UserRepo.InsertUser(tx, models.User{
+			Email: register_request.Email,
+			Name:  register_request.Name,
+		})
+		if err != nil {
+			return err
+		}
+		_, err = service.AuthRepo.InsertAuthIdentity(tx, models.AuthIdentity{
+			UserId:   user.ID,
+			Password: string(hashedPassword),
+		})
+		if err != nil {
+			return err
+		}
+
+		return nil
 	})
 	if err != nil {
 		return nil, err

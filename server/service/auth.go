@@ -6,10 +6,10 @@ import (
 )
 
 type AuthService struct {
-	AuthRepo *repository.AuthRepository
+	AuthRepo repository.AuthRepository
 }
 
-func NewAuthService(userRepo *repository.UserRepository, authRepo *repository.AuthRepository) *AuthService {
+func NewAuthService(authRepo repository.AuthRepository) *AuthService {
 	return &AuthService{
 		AuthRepo: authRepo,
 	}

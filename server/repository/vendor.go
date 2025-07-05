@@ -6,15 +6,24 @@ import (
 	"gorm.io/gorm"
 )
 
-type VendorRepository struct {
+type VendorRepository interface {
+	GetAllVendors() ([]*models.Vendor, error)
+	InsertVendor(vendor models.Vendor) (*models.Vendor, error)
+	CheckVendorExists(vendor_id int64) (bool, error)
+	UpdateAverageRating(vendor_id int64) error
+	GetVendorById(vendor_id int64) (*models.Vendor, error)
+	GetDB() *gorm.DB
+}
+
+type GormVendorRepository struct {
 	DB *gorm.DB
 }
 
-func NewVendorRepository(db *gorm.DB) *VendorRepository {
-	return &VendorRepository{DB: db}
+func NewVendorRepository(db *gorm.DB) VendorRepository {
+	return GormVendorRepository{DB: db}
 }
 
-func (repo *VendorRepository) GetAllVendors() ([]*models.Vendor, error) {
+func (repo GormVendorRepository) GetAllVendors() ([]*models.Vendor, error) {
 	var vendors []*models.Vendor
 
 	err := repo.DB.Find(&vendors).Error
@@ -25,7 +34,7 @@ func (repo *VendorRepository) GetAllVendors() ([]*models.Vendor, error) {
 	return vendors, nil
 }
 
-func (repo *VendorRepository) InsertVendor(vendor models.Vendor) (*models.Vendor, error) {
+func (repo GormVendorRepository) InsertVendor(vendor models.Vendor) (*models.Vendor, error) {
 	err := repo.DB.Create(&vendor).Error
 	if err != nil {
 		return nil, err
@@ -34,7 +43,7 @@ func (repo *VendorRepository) InsertVendor(vendor models.Vendor) (*models.Vendor
 	return &vendor, nil
 }
 
-func (repo *VendorRepository) CheckVendorExists(vendor_id int64) (bool, error) {
+func (repo GormVendorRepository) CheckVendorExists(vendor_id int64) (bool, error) {
 	var count int64
 
 	err := repo.DB.Model(&models.Vendor{}).Where("id = ?", vendor_id).Count(&count).Error
@@ -45,7 +54,7 @@ func (repo *VendorRepository) CheckVendorExists(vendor_id int64) (bool, error) {
 	return count > 0, nil
 }
 
-func (repo *VendorRepository) UpdateAverageRating(vendor_id int64) error {
+func (repo GormVendorRepository) UpdateAverageRating(vendor_id int64) error {
 	var average_rating float64
 
 	err := repo.DB.
@@ -68,7 +77,7 @@ func (repo *VendorRepository) UpdateAverageRating(vendor_id int64) error {
 	return nil
 }
 
-func (repo *VendorRepository) GetVendorById(vendor_id int64) (*models.Vendor, error) {
+func (repo GormVendorRepository) GetVendorById(vendor_id int64) (*models.Vendor, error) {
 	var vendor models.Vendor
 
 	err := repo.DB.First(&vendor, vendor_id).Error
@@ -77,4 +86,8 @@ func (repo *VendorRepository) GetVendorById(vendor_id int64) (*models.Vendor, er
 	}
 
 	return &vendor, nil
+}
+
+func (repo GormVendorRepository) GetDB() *gorm.DB {
+	return repo.DB
 }

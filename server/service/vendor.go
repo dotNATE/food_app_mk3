@@ -7,10 +7,10 @@ import (
 )
 
 type VendorService struct {
-	VendorRepo *repository.VendorRepository
+	VendorRepo repository.VendorRepository
 }
 
-func NewVendorService(vendorRepo *repository.VendorRepository) *VendorService {
+func NewVendorService(vendorRepo repository.VendorRepository) *VendorService {
 	return &VendorService{
 		VendorRepo: vendorRepo,
 	}
