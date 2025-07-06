@@ -12,6 +12,15 @@ import (
 	"gorm.io/gorm"
 )
 
+type DBInterface interface {
+	WithTransaction(func(tx *gorm.DB) error) error
+	GetDB() *gorm.DB
+}
+
+type GormDB struct {
+	DB *gorm.DB
+}
+
 func ConnectWithRetry(maxRetries int, delay time.Duration) (*gorm.DB, error) {
 	var db *gorm.DB
 	var err error
@@ -45,8 +54,8 @@ func ConnectWithRetry(maxRetries int, delay time.Duration) (*gorm.DB, error) {
 	return nil, fmt.Errorf("could not connect to database after %d attempts: %v", maxRetries, err)
 }
 
-func WithTransaction(db *gorm.DB, fn func(tx *gorm.DB) error) error {
-	tx := db.Begin()
+func (g GormDB) WithTransaction(fn func(tx *gorm.DB) error) error {
+	tx := g.DB.Begin()
 	if tx.Error != nil {
 		return tx.Error
 	}
@@ -64,4 +73,8 @@ func WithTransaction(db *gorm.DB, fn func(tx *gorm.DB) error) error {
 	}
 
 	return tx.Commit().Error
+}
+
+func (g *GormDB) GetDB() *gorm.DB {
+	return g.DB
 }

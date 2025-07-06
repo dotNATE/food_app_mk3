@@ -6,7 +6,7 @@ import (
 	"gorm.io/gorm"
 )
 
-type RatingRepository interface {
+type RatingRepositoryInterface interface {
 	InsertRating(rating models.Rating) (*models.Rating, error)
 	GetRatingById(rating_id int64, vendor_id int64) (*models.Rating, error)
 	GetRatingsByVendorId(vendor_id int64) ([]*models.Rating, error)
@@ -17,7 +17,7 @@ type GormRatingRepository struct {
 	DB *gorm.DB
 }
 
-func NewRatingRepository(db *gorm.DB) RatingRepository {
+func NewRatingRepository(db *gorm.DB) RatingRepositoryInterface {
 	return GormRatingRepository{DB: db}
 }
 

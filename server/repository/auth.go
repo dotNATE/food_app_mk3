@@ -7,16 +7,17 @@ import (
 	"gorm.io/gorm"
 )
 
-type AuthRepository interface {
+type AuthRepositoryInterface interface {
 	InsertAuthIdentity(tx *gorm.DB, auth models.AuthIdentity) (*models.AuthIdentity, error)
 	GetAuthByUserId(user_id int64) (*models.AuthIdentity, error)
 	GetDB() *gorm.DB
 }
+
 type GormAuthRepository struct {
 	DB *gorm.DB
 }
 
-func NewAuthRepository(db *gorm.DB) AuthRepository {
+func NewAuthRepository(db *gorm.DB) AuthRepositoryInterface {
 	return GormAuthRepository{DB: db}
 }
 

@@ -18,6 +18,14 @@ type RegisterRequest struct {
 	PasswordField
 }
 
+func NewRegisterRequest(name string, email string, password string) *RegisterRequest {
+	return &RegisterRequest{
+		NameField:     NameField{Name: name},
+		EmailField:    EmailField{Email: email},
+		PasswordField: PasswordField{Password: password},
+	}
+}
+
 type UserResponse struct {
 	ID    int64  `json:"id"`
 	Name  string `json:"name"`

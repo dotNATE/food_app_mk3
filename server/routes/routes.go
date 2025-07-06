@@ -16,7 +16,7 @@ func RegisterRoutes(router *gin.Engine, db *gorm.DB) {
 	userRepo := repository.NewUserRepository(db)
 	authRepo := repository.NewAuthRepository(db)
 
-	userService := service.NewUserService(userRepo, authRepo)
+	userService := service.NewUserService(userRepo, authRepo, &repository.GormDB{DB: db})
 	authService := service.NewAuthService(authRepo)
 	vendorService := service.NewVendorService(vendorRepo)
 	ratingService := service.NewRatingService(ratingRepo)

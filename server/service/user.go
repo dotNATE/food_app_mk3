@@ -11,14 +11,16 @@ import (
 )
 
 type UserService struct {
-	UserRepo repository.UserRepository
-	AuthRepo repository.AuthRepository
+	UserRepo repository.UserRepositoryInterface
+	AuthRepo repository.AuthRepositoryInterface
+	DB       repository.DBInterface
 }
 
-func NewUserService(userRepo repository.UserRepository, authRepo repository.AuthRepository) *UserService {
+func NewUserService(userRepo repository.UserRepositoryInterface, authRepo repository.AuthRepositoryInterface, db repository.DBInterface) *UserService {
 	return &UserService{
 		UserRepo: userRepo,
 		AuthRepo: authRepo,
+		DB:       db,
 	}
 }
 
@@ -37,7 +39,7 @@ func (service *UserService) RegisterNewUser(register_request *dto.RegisterReques
 	}
 
 	var user *models.User
-	err = repository.WithTransaction(service.UserRepo.GetDB(), func(tx *gorm.DB) error {
+	err = service.DB.WithTransaction(func(tx *gorm.DB) error {
 		user, err = service.UserRepo.InsertUser(tx, models.User{
 			Email: register_request.Email,
 			Name:  register_request.Name,

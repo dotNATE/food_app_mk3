@@ -7,7 +7,7 @@ import (
 	"gorm.io/gorm"
 )
 
-type UserRepository interface {
+type UserRepositoryInterface interface {
 	InsertUser(tx *gorm.DB, user models.User) (*models.User, error)
 	CheckUserExists(email string) (bool, error)
 	GetUserByEmail(email string) (*models.User, error)
@@ -19,7 +19,7 @@ type GormUserRepository struct {
 	DB *gorm.DB
 }
 
-func NewUserRepository(db *gorm.DB) UserRepository {
+func NewUserRepository(db *gorm.DB) UserRepositoryInterface {
 	return GormUserRepository{DB: db}
 }
 

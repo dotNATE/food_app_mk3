@@ -6,7 +6,7 @@ import (
 	"gorm.io/gorm"
 )
 
-type VendorRepository interface {
+type VendorRepositoryInterface interface {
 	GetAllVendors() ([]*models.Vendor, error)
 	InsertVendor(vendor models.Vendor) (*models.Vendor, error)
 	CheckVendorExists(vendor_id int64) (bool, error)
@@ -19,7 +19,7 @@ type GormVendorRepository struct {
 	DB *gorm.DB
 }
 
-func NewVendorRepository(db *gorm.DB) VendorRepository {
+func NewVendorRepository(db *gorm.DB) VendorRepositoryInterface {
 	return GormVendorRepository{DB: db}
 }
 
